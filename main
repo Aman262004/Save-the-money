@@ -1,0 +1,304 @@
+package culminating;
+import java.util.Random;
+import java.util.Scanner;
+/*Save The Money
+ * Aman Dhillon
+ * June 14, 2021
+ */
+
+public class SaveTheMoneyAman {
+
+	public static void main(String[] args) {
+
+		Scanner input = new Scanner(System.in);
+		Random random = new Random();
+
+		//Variable Table
+
+		String topic; // stores the name of the topic that the user wants to play
+		String theword; //stores a word that is randomly generated that the user must try to guess
+		String guess; // stores the the letter or word that is guessed by the user
+		boolean valid;  //stores whether or not the actual word contains the guess by the user or not
+		boolean valid2; //stores true of false based on whether or not the user has guessed the same letter twice
+		boolean invalid;//stores a true or false value based on if the user has chose a level to play or not
+		int money; //stores the amount of money the user has
+		int lcounter; //stores how many letters are left to be guessed
+		int lettersused; //stores how many letter have been used
+
+		invalid = true;
+		theword = null;
+		topic = null;
+
+		//rules of the game
+		System.out.println("Welcome to Save The Money! You will now be guessing a random word with the objective being to make the most money at the same time.");
+		System.out.println("You will start off with $2000.");
+		System.out.println("Each time you guess a right letter, you will gain money however if you guess a wrong letter, you will lose money.");
+		System.out.println("If you enter a wrong letter multiple times, you will still lose money.");
+		System.out.println("Each level has its own theme. What level would you like to play:");
+		System.out.println("Food, Sports, or Places?");
+		topic = input.nextLine();
+
+		String[] food = { "pizza", "icecream", "popcorn", "apples","burger", "broccoli", "mango", "chips", "fries","chicken" };
+		String[] sports = { "hockey", "basketball", "soccer","football", "rugby", "cricket", "tennis", "volleyball","baseball", "golf" };
+		String[] places = { "park", "library", "home", "school","theatre", "university", "stadium", "office", "store","resort" };
+
+		while (invalid == true) { // loop will run until the user enters a valid level
+
+			if (topic.equalsIgnoreCase("food")) {
+				theword = food[random.nextInt(10)]; // populates the array and chooses any 1 random word
+				invalid = false; // once user enters a valid theme, either food, sports, or places, the while loop will end
+			}
+			else if (topic.equalsIgnoreCase("sports")) {
+				theword = sports[random.nextInt(10)];
+				invalid = false;
+			}
+
+			else if (topic.equalsIgnoreCase("places")) {
+				theword = places[random.nextInt(10)];
+				invalid = false;
+			}
+
+			else {
+				System.out.println("That is not a valid topic. Please enter a valid topic you wish to play");
+				topic = input.nextLine();
+
+				invalid = true; // invalid will remain true if the user enters an invalid level and the while loop will repeat until a valid level is entered
+			}
+		}
+
+		System.out.println();
+
+		money = 2000;
+		lcounter = theword.length();
+		lettersused = 0;
+
+		System.out.println("A word has been randomly selected.");
+		String[] upword = new String[theword.length()];
+
+		for (int i = 0; i < upword.length; i++) {
+			upword[i] = " _ "; // populates the updated word array with as many blanks as letters in the word
+			System.out.print(upword[i]); // random word generated
+		}
+
+		String[] lettuse = new String[100];
+
+		for (int i = 0; i < lettuse.length; i++) { // populates the array with spaces until the user enters letters which will be stored in this array
+			lettuse[i] = "  ";  
+		}
+
+		System.out.println();
+
+		while (!(lcounter == 0) && !(money == 0) && !(lcounter == 100)) { // while loop will run as long as 1counter or money is not zero
+
+			System.out.print("Please guess a letter: ");
+			guess = input.next();
+			guess = guess.substring(0, 1); // stores only the first character entered
+
+			valid = CheckLetter(theword, guess); 
+			valid2 = RepeatOrNo(guess, upword);
+
+			if (valid == true && valid2 == true) { // only goes through this if statement if the user has entered a letter that is a part of the word and hasn't already used that letter before
+				System.out.println("That letter is part of the word!"); // this statement tells the user if they got the right letter or not 
+				lcounter = LettersLeft(lcounter, theword, guess, upword); // updates 1counter and money accordingly
+				money = UpdateMoney(money, theword, guess);
+			}
+
+			else if (valid == false) { // runs if the user enters a letter that is not part of the actual word
+				System.out.println();
+				System.out.println("That letter is not part of the word!");
+				money = UpdateMoney(money, theword, guess);
+
+			}
+
+			else if (valid2 == false) { // runs if the user enters a letter that has been entered before
+				System.out.println("You have already used that letter. Please enter a different one.");
+			}
+
+			UpdatedWord(theword, guess, upword);
+			System.out.println();
+			LettersUsed(guess, lettersused, lettuse);
+
+			System.out.println();
+			System.out.println();
+
+			System.out.println("Your updated amount of money is $" + money + ".");
+			lettersused = lettersused + 1;
+
+			if (!(money == 0) && !(lcounter == 0)) { // only runs if money or lcounter are not zero
+				lcounter = GuessWhole(guess, theword, lcounter);
+			}
+		}
+		input.close();
+
+		if (lcounter == 0) {
+			System.out.println("You won! Good job! You figured out that the word was "+ theword + ".");
+			System.out.println("You ended with $" + money + "!");
+		}
+
+		else if (money == 0) {
+			System.out.println("You lost because you went bankrupt! The word was "+ theword + ".");
+		}
+
+		else if (lcounter == 100) {
+			System.out.println("You lost because you guessed the word wrong! The word was "+ theword + ".");
+		}
+
+	} //end of main
+
+	/*checks if the letter entered by the user is in the actual word 
+	 * pre: String theword1 (the actual word) and String guess1 (the letter that the user guessed)
+	 * post:boolean v (stores whether the guess by the user is right or wrong)
+	 */
+	public static boolean CheckLetter(String theword1, String guess1) {
+		boolean v = true;
+
+		if (theword1.contains(guess1)) { // returns true if the letter guessed is part of the word that was randomly generated
+			v = true;
+		}
+
+		else {
+			v = false; // returns false if the letter guessed is not part of the word that was randomly generated
+		}
+
+		return v;
+
+	} //end of method
+
+	/*checks the position of the letter entered
+	 * pre: String theword4 (the actual word) and String guess4 (the letter that the user guessed)
+	 * post: int p1 (displays the index of the letter that the user guessed in the actual word)
+	 */
+	public static int LetterPosition(String theword4, String guess4) {
+		int p1 = 0;
+		p1 = theword4.indexOf(guess4); // takes the index of the guessed letter in the word						
+
+		return p1;
+		
+	} //end of method
+
+	/*displays the amount of money the user has after each round
+	 * pre: String theword2 (the actual word) and String guess2 (the letter that the user guessed) and int money1 (the amount of money the user has)
+	 * post: int money1
+	 */
+	public static int UpdateMoney(int money1, String theword2, String guess2) {
+
+		if (CheckLetter(theword2, guess2) == true) {
+			money1 = money1 + 500; // adds $500 if the guessed letter is part of the word
+		}
+
+		else {
+			money1 = money1 - 500; // subtracts $500 if the guessed letter is not part of the word
+		}
+
+		return money1;
+
+	} //end of method 
+
+	/*returns the amount of money the user has after each round
+	 * pre: String upword3 (array of all of the letter that the user has entered that are part of the actual word) 
+	 * and String guess3 (the letter that the user guessed) and int money1 (the amount of money the user has) and
+	 * int lcounter1 (the number of letters left to be guessed in the word)
+	 * post: int lcounter1 (the number of letters)
+	 */
+	public static int LettersLeft(int lcounter1, String theword3, String guess3, String[] upword3) {
+		for (int p2 = theword3.indexOf(guess3); // subtracts 1 as many times as a letter shows up in the word
+				p2 >= 0; 
+				p2 = theword3.indexOf(guess3, p2 + 1)) {
+
+			lcounter1 = lcounter1 - 1;
+		}
+
+		return lcounter1;
+
+	} //end of method
+
+	/*display's the updated word after the letters have been added
+	 * pre: String theword5 (the actual word), String guess5 (the letter that the user guessed), 
+	 * String[] upword1 (array of all of the letter that the user has entered that are part of the actual word
+	 * post: n/a
+	 */
+
+	public static void UpdatedWord(String theword5, String guess5, String[] upword1) {
+		System.out.println();
+		System.out.println("The updated word is:");
+
+		for (int i = 0; i < upword1.length; i++) {
+
+			for (int p = theword5.indexOf(guess5); // updates the array that contains underscores and replaces the underscores with the								
+					p >= 0; // guess from the user in that specific index if the guess is right
+
+					p = theword5.indexOf(guess5, p + 1)) {
+				upword1[p] = guess5;
+			}
+			System.out.print(upword1[i]);
+		}
+
+	} //end of method
+
+	/*displays all the letters that the player has used
+	 * pre: String guess6 (the letter that the user guessed), int lettersused1, (stores the number of letter used)
+	 * String[] lettuse1 (array of all of the letters that the user has already guessed)
+	 * post: n/a
+	 */
+	public static void LettersUsed(String guess6, int lettersused1, String[] lettuse1) {
+
+		System.out.println();
+		System.out.println("Letters Used:");
+		lettuse1[lettersused1] = guess6;
+
+		for (int i = 0; i < lettuse1.length; i++) // outputs all of the letters guessed by the user
+			System.out.print(lettuse1[i] + " ");
+
+	} //end of method
+
+	/*displays if the user has entered the same letter twice
+	 *pre: String guess7(the letter that the user guessed), String[] upword2 (array of all of the letter that the
+	 * user has entered that are part of the actual word)
+	 * post: boolean v2 (stores true of false based on whether or not the user has guessed the same letter twice)
+	 */
+	public static boolean RepeatOrNo(String guess7, String[] upword2) {
+		boolean v2 = true;
+
+		for (int i = 0; i < upword2.length; i++) {
+			if (guess7.equals(upword2[i])) { // if the user's guess equals any letter already in the updated word, returns false				
+				v2 = false;
+			}
+		}
+
+		return v2;
+
+	} //end of method
+
+	/*asks whether the user wants to guess the word or not
+	 * pre: String guess10 (the letter that the user guessed), String theword10 (the actual word) , 
+	 * int lcounter5 (the number of letters left to be guessed of the actual word)
+	 * post: int 1counter5 (the number of letters left to be guessed of the actual word)
+	 */
+	public static int GuessWhole(String guess10, String theword10, int lcounter5) {
+		Scanner input = new Scanner(System.in);
+		String yesorno; // stores the whether the user wants to guess the word or not
+
+		System.out.println("Do you want to try to guess the word, yes or no? If you guess wrong, you will lose! Decide wisely!");
+		yesorno = input.nextLine();
+		System.out.println();
+
+		if (yesorno.equalsIgnoreCase("yes")) {
+			System.out.println("Enter the word:");
+			guess10 = input.nextLine(); // if the user guesses the word correctly, subtracts lcounter by itself to end the game
+
+			if (guess10.equalsIgnoreCase(theword10)) {
+				lcounter5 = lcounter5 - lcounter5;
+			} 
+
+			else {
+				System.out.println("That is not the word!"); 
+				lcounter5 = 100;
+			}
+		}
+
+		return lcounter5;
+
+	} //end of method
+
+} //end of program
+
