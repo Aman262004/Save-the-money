@@ -1,0 +1,73 @@
+#Aman Dhillon
+#sept 22, 2021
+import random
+from random import randint
+spots=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+
+poster=[]
+doll=[]
+game=[]
+ball=[]
+puzzle=[]
+prizes=[poster, doll, game, ball, puzzle]
+Names=["Poster", "Doll", "Game", "Ball", "Puzzle"]
+
+check=""
+temp=[]
+number_1=1
+number_2=6
+x_list=[]
+pennies=[]
+
+#I made it so the pennies can land on the same spot more than once because....
+#...it is all chance but if you would like me to make so it never lands on the same spot let me know
+
+for i in range(10):
+    temp=random.randint(1,25)
+    pennies.append(temp)
+
+#everytime a spot gets chosen it removes it from the spots list so there are no duplicates
+for i in range(5):
+    for i2 in range(3):
+        temp=random.choice(spots)
+        spots.remove(temp)
+        prizes[i].append(temp)
+        temp=[]
+
+#here i am making the grid it checks the lists inside the prizes if it matches that prize gets printed if not the number_1/2 get added 5 so it can move onto the next row
+for i in range(5):
+    x_list=[]
+    for i2 in range(number_1,number_2):
+        if i2 in poster:
+            x_list.append("Poster")
+        elif i2 in game:
+            x_list.append(" Game ")
+        elif i2 in ball:
+            x_list.append(" Ball ")
+        elif i2 in doll:
+            x_list.append(" Doll ")
+        elif i2 in puzzle:
+            x_list.append("Puzzle")
+        else:
+            x_list.append("      ")
+#here when printing the board I have to make it into a string so i can remove the [] and ''    
+    print(str(x_list).replace("'", "").replace(", ", "]["))
+    number_1+=5
+    number_2+=5
+
+#here the pennies are getting matched up with the board if the pennies match up with a prize on the board then that spot gets removed from the prize
+for i in range(10):
+    for i2 in range(5):
+        if pennies[i] in prizes[i2]:
+            prizes[i2].remove(pennies[i])
+
+#if the list is empty for the prizes it means they won that prize and it gets printed
+for i in range(5):
+    if len(prizes[i])==0:
+        print("Congrats you win a",Names[i]+"!!!")
+        check="True"
+#if no prizes are given this message is displayed        
+if check!="True":
+        print("Sorry, please play again")
+
+
